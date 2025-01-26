@@ -1,13 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	router := gin.Default()
-	fmt.Println("Hello, World!")
-	router.Run()
+	port := os.Getenv("PORT")
+
+	err = router.Run(port)
+	if err != nil {
+		panic("Failed to start server on port " + port + " due to error: " + err.Error())
+	}
 }
