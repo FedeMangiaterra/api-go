@@ -64,6 +64,39 @@ func DeleteUser(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
 }
 
+func UpdateUser(c *gin.Context) {
+	id := c.Param("id")
+	var updatedUser User
+	if err := c.BindJSON(&updatedUser); err != nil {
+		return
+	}
+
+	if updatedUser.ID == "" && updatedUser.Name == "" && updatedUser.Email == "" && updatedUser.Age == 0 {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "missing required fields"})
+		return
+	}
+
+	for i, user := range users {
+		if user.ID == id {
+			if updatedUser.ID != "" {
+				users[i].ID = updatedUser.ID
+			}
+			if updatedUser.Name != "" {
+				users[i].Name = updatedUser.Name
+			}
+			if updatedUser.Email != "" {
+				users[i].Email = updatedUser.Email
+			}
+			if updatedUser.Age != 0 {
+				users[i].Age = updatedUser.Age
+			}
+			c.IndentedJSON(http.StatusOK, users[i])
+			return
+		}
+	}
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -79,6 +112,8 @@ func main() {
 	router.POST("/users", CreateUser)
 
 	router.DELETE("/users/:id", DeleteUser)
+
+	router.PATCH("/users/:id", UpdateUser)
 
 	err = router.Run(port)
 	if err != nil {
